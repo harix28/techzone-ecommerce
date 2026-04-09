@@ -87,6 +87,8 @@ Important values:
 - `DB_NAME`
 - `DB_USER`
 - `DB_PASSWORD`
+- `DB_SSL_MODE`
+- `DB_SSL_CA` or `DB_SSL_CA_BASE64` for managed MySQL providers that require TLS
 - `JWT_ACCESS_SECRET`
 - `JWT_REFRESH_SECRET`
 - `CORS_ORIGINS`
@@ -217,6 +219,9 @@ These ensure SPA routing works for deep links like `/products/12` and `/admin/or
    - `DB_NAME`
    - `DB_USER`
    - `DB_PASSWORD`
+   - `DB_SSL=true`
+   - `DB_SSL_MODE=required`
+   - `DB_SSL_CA` or `DB_SSL_CA_BASE64`
    - `JWT_ACCESS_SECRET`
    - `JWT_REFRESH_SECRET`
    - `JWT_ACCESS_TTL`
@@ -224,6 +229,30 @@ These ensure SPA routing works for deep links like `/products/12` and `/admin/or
    - `JWT_REFRESH_COOKIE_NAME`
    - `CORS_ORIGINS=https://your-netlify-site.netlify.app`
 5. Deploy.
+
+## Managed MySQL on Aiven
+
+If you are deploying the backend on Vercel and the database on Aiven:
+
+1. Create the MySQL service in Aiven.
+2. Use either Aiven's default database name (`defaultdb`) or create a dedicated database such as `techzone_ecommerce`.
+3. Copy the Aiven connection values into your backend environment:
+   - `DB_HOST=<aiven-host>`
+   - `DB_PORT=<aiven-port>`
+   - `DB_NAME=defaultdb` or your custom database name
+   - `DB_USER=<aiven-user>`
+   - `DB_PASSWORD=<aiven-password>`
+   - `DB_SSL=true`
+   - `DB_SSL_MODE=required`
+4. Open the Aiven CA certificate and paste it into `DB_SSL_CA`, or base64-encode it and store it in `DB_SSL_CA_BASE64`.
+5. Run the schema and seed against that hosted database before expecting catalog data in production:
+
+```bash
+cd backend
+npm run db:setup
+```
+
+You can run that from a local machine after updating `backend/.env` with the Aiven connection values, or execute the schema manually in MySQL Workbench and then run `npm run seed`.
 
 ## Optional Vercel frontend deployment
 

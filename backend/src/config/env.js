@@ -8,13 +8,49 @@ const toInt = (value, fallback) => {
   return Number.isNaN(parsed) ? fallback : parsed;
 };
 
+const toBool = (value, fallback = false) => {
+  if (value === undefined || value === null || value === '') {
+    return fallback;
+  }
+
+  const normalized = String(value).trim().toLowerCase();
+
+  if (['1', 'true', 'yes', 'on'].includes(normalized)) {
+    return true;
+  }
+
+  if (['0', 'false', 'no', 'off'].includes(normalized)) {
+    return false;
+  }
+
+  return fallback;
+};
+
 const toList = (value) =>
   String(value || '')
     .split(',')
     .map((item) => item.trim())
     .filter(Boolean);
 
+const decodeMultiline = (value) => String(value || '').replace(/\\n/g, '\n').trim();
+
+const decodeBase64 = (value) => {
+  if (!value) {
+    return '';
+  }
+
+  try {
+    return Buffer.from(String(value), 'base64').toString('utf8').trim();
+  } catch (error) {
+    return '';
+  }
+};
+
 const nodeEnv = process.env.NODE_ENV || 'development';
+const sslMode = String(process.env.DB_SSL_MODE || '').trim().toLowerCase();
+const sslCa = decodeBase64(process.env.DB_SSL_CA_BASE64) || decodeMultiline(process.env.DB_SSL_CA);
+const sslEnabled =
+  toBool(process.env.DB_SSL, false) || ['required', 'verify-ca', 'verify_identity'].includes(sslMode);
 
 module.exports = {
   nodeEnv,
@@ -34,6 +70,12 @@ module.exports = {
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
     connectionLimit: toInt(process.env.DB_CONNECTION_LIMIT, 10),
+    ssl: {
+      enabled: sslEnabled,
+      mode: sslMode || 'disabled',
+      rejectUnauthorized: toBool(process.env.DB_SSL_REJECT_UNAUTHORIZED, true),
+      ca: sslCa,
+    },
   },
   auth: {
     accessSecret: process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET || 'change-me-access-secret',
