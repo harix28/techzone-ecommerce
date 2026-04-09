@@ -1,12 +1,33 @@
 const mysql = require('mysql2/promise');
 const env = require('./env');
 
+const buildSslConfig = () => {
+  if (!env.db.ssl.enabled) {
+    return undefined;
+  }
+
+  return {
+    rejectUnauthorized: env.db.ssl.rejectUnauthorized,
+    ...(env.db.ssl.ca ? { ca: env.db.ssl.ca } : {}),
+  };
+};
+
+const buildDbConfig = ({ includeDatabase = true, multipleStatements = false } = {}) => {
+  const ssl = buildSslConfig();
+
+  return {
+    host: env.db.host,
+    port: env.db.port,
+    ...(includeDatabase ? { database: env.db.name } : {}),
+    user: env.db.user,
+    password: env.db.password,
+    ...(multipleStatements ? { multipleStatements: true } : {}),
+    ...(ssl ? { ssl } : {}),
+  };
+};
+
 const pool = mysql.createPool({
-  host: env.db.host,
-  port: env.db.port,
-  database: env.db.name,
-  user: env.db.user,
-  password: env.db.password,
+  ...buildDbConfig(),
   waitForConnections: true,
   connectionLimit: env.db.connectionLimit,
   decimalNumbers: true,
@@ -56,4 +77,5 @@ module.exports = {
   execute,
   withTransaction,
   testConnection,
+  buildDbConfig,
 };

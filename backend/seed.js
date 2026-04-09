@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const mysql = require('mysql2/promise');
 
-const env = require('./src/config/env');
+const { buildDbConfig } = require('./src/config/database');
 const { categories, products } = require('./scripts/seed-data/catalog');
 const { users } = require('./scripts/seed-data/users');
 const { carts, coupons, orders, reviews, wishlists } = require('./scripts/seed-data/commerce');
@@ -73,11 +73,7 @@ const paymentStateForOrder = (order) => {
 
 const runSeed = async () => {
   const connection = await mysql.createConnection({
-    host: env.db.host,
-    port: env.db.port,
-    user: env.db.user,
-    password: env.db.password,
-    database: env.db.name,
+    ...buildDbConfig(),
     decimalNumbers: true,
   });
 
