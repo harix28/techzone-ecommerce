@@ -1,80 +1,126 @@
 import { Link } from 'react-router-dom';
-import { FiStar, FiShoppingCart, FiHeart } from 'react-icons/fi';
+import { FiHeart, FiShoppingCart, FiStar } from 'react-icons/fi';
 import { useCart } from '../../context/CartContext';
+import { useWishlist } from '../../context/WishlistContext';
+import { getProductHref, getProductId, getProductImage, isLowStock } from '../../utils/catalog';
+import { formatCurrency } from '../../utils/format';
 
 export default function ProductCard({ product }) {
   const { addItem } = useCart();
+  const { hasItem, toggleWishlist } = useWishlist();
 
-  const image = product.images?.[0] || `https://picsum.photos/seed/${product._id}/400/400`;
-  const discount = product.originalPrice
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-    : 0;
+  const productId = getProductId(product);
+  const imageUrl = getProductImage(product, 'product-card');
+  const href = getProductHref(product);
+  const compareAtPrice = Number(product.compareAtPrice || 0);
+  const discount =
+    compareAtPrice > Number(product.price || 0)
+      ? Math.round(((compareAtPrice - product.price) / compareAtPrice) * 100)
+      : 0;
+  const outOfStock = Number(product.stockQuantity || 0) <= 0;
+  const saved = hasItem(productId);
 
   return (
-    <div className="card product-card group">
-      <Link to={`/products/${product._id}`} className="block relative">
-        <div className="aspect-square overflow-hidden bg-gray-50">
-          <img src={image} alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            onError={(e) => { e.target.src = `https://picsum.photos/seed/${product._id}/400/400`; }}
-          />
-        </div>
-        {discount > 0 && (
-          <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg">
-            -{discount}%
-          </span>
-        )}
-        {product.isFeatured && (
-          <span className="absolute top-2 right-2 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-lg">
-            Featured
-          </span>
-        )}
-        {product.stock === 0 && (
-          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-            <span className="bg-white text-gray-800 font-bold px-4 py-2 rounded-lg text-sm">Out of Stock</span>
+    <div className="card product-card group bg-white">
+      <div className="relative">
+        <Link to={href} className="block">
+          <div className="aspect-square overflow-hidden bg-slate-50">
+            <img
+              src={imageUrl}
+              alt={product.name}
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              onError={(event) => {
+                event.target.src = `https://picsum.photos/seed/fallback-${productId}/800/800`;
+              }}
+            />
           </div>
-        )}
-      </Link>
-
-      <div className="p-4">
-        <p className="text-xs text-gray-400 font-medium mb-0.5">{product.brand}</p>
-        <Link to={`/products/${product._id}`}>
-          <h3 className="font-semibold text-sm text-gray-900 leading-tight line-clamp-2 hover:text-blue-600 transition-colors mb-2">
-            {product.name}
-          </h3>
         </Link>
 
-        <div className="flex items-center gap-1 mb-3">
-          <div className="flex items-center">
-            {[1, 2, 3, 4, 5].map(star => (
-              <FiStar key={star}
-                className={`w-3 h-3 ${star <= Math.round(product.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-200'}`}
-              />
-            ))}
+        <button
+          type="button"
+          onClick={() => toggleWishlist(productId)}
+          className={`absolute right-3 top-3 inline-flex h-10 w-10 items-center justify-center rounded-full border transition ${
+            saved
+              ? 'border-rose-200 bg-rose-50 text-rose-600'
+              : 'border-white/80 bg-white/90 text-slate-600 hover:text-rose-600'
+          }`}
+          aria-label={saved ? 'Remove from wishlist' : 'Save to wishlist'}
+        >
+          <FiHeart className={saved ? 'fill-current' : ''} />
+        </button>
+
+        {discount > 0 ? (
+          <span className="absolute left-3 top-3 rounded-full bg-rose-600 px-3 py-1 text-xs font-semibold text-white">
+            Save {discount}%
+          </span>
+        ) : null}
+
+        {product.isFeatured ? (
+          <span className="absolute bottom-3 left-3 rounded-full bg-slate-900/85 px-3 py-1 text-xs font-semibold text-white">
+            Featured
+          </span>
+        ) : null}
+
+        {outOfStock ? (
+          <div className="absolute inset-0 flex items-center justify-center bg-slate-950/50">
+            <span className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-900">
+              Out of stock
+            </span>
           </div>
-          <span className="text-xs text-gray-500">({product.numReviews})</span>
+        ) : null}
+      </div>
+
+      <div className="space-y-4 p-5">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between gap-3 text-xs uppercase tracking-[0.18em] text-slate-400">
+            <span>{product.brand}</span>
+            <span>{product.category?.name}</span>
+          </div>
+          <Link to={href}>
+            <h3 className="text-base font-semibold leading-snug text-slate-900 transition group-hover:text-blue-700">
+              {product.name}
+            </h3>
+          </Link>
+          <div className="flex items-center gap-2 text-sm text-slate-500">
+            <div className="flex items-center gap-1 text-amber-400">
+              <FiStar className="fill-current" />
+              <span className="font-medium text-slate-700">
+                {(product.ratingAverage || 0).toFixed(1)}
+              </span>
+            </div>
+            <span>({product.ratingCount || 0} reviews)</span>
+          </div>
         </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-end justify-between gap-3">
           <div>
-            <span className="text-lg font-bold text-gray-900">${product.price.toLocaleString()}</span>
-            {product.originalPrice && (
-              <span className="text-sm text-gray-400 line-through ml-2">${product.originalPrice.toLocaleString()}</span>
-            )}
+            <div className="text-xl font-bold text-slate-900">{formatCurrency(product.price)}</div>
+            {compareAtPrice ? (
+              <div className="text-sm text-slate-400 line-through">
+                {formatCurrency(compareAtPrice)}
+              </div>
+            ) : null}
           </div>
 
           <button
-            onClick={(e) => { e.preventDefault(); addItem(product, 1); }}
-            disabled={product.stock === 0}
-            className="p-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 disabled:cursor-not-allowed text-white rounded-xl transition-colors"
-            title="Add to cart"
+            type="button"
+            onClick={() => addItem(product, 1)}
+            disabled={outOfStock}
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
           >
-            <FiShoppingCart size={16} />
+            <FiShoppingCart />
+            Add
           </button>
         </div>
 
-        {product.stock > 0 && product.stock <= 5 && (
-          <p className="text-xs text-orange-500 font-medium mt-2">Only {product.stock} left!</p>
+        {isLowStock(product) ? (
+          <p className="text-sm font-medium text-amber-700">
+            Only {product.stockQuantity} units left in stock.
+          </p>
+        ) : (
+          <p className="text-sm text-slate-500">
+            {outOfStock ? 'Back soon' : `${product.stockQuantity} ready to ship`}
+          </p>
         )}
       </div>
     </div>
