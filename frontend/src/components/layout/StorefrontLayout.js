@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   FiChevronDown,
@@ -9,7 +9,10 @@ import {
   FiPackage,
   FiSearch,
   FiSettings,
+  FiShield,
   FiShoppingCart,
+  FiStar,
+  FiTruck,
   FiUser,
   FiX,
 } from 'react-icons/fi';
@@ -18,7 +21,8 @@ import API, { extractApiData } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
-import { getCategoryIconLabel, getCategoryTheme } from '../../utils/catalog';
+import { getCategoryIconLabel, getCategoryTheme, getProductHref } from '../../utils/catalog';
+import { formatCurrency } from '../../utils/format';
 
 export default function StorefrontLayout() {
   const { user, logout, isAdmin } = useAuth();
@@ -30,10 +34,13 @@ export default function StorefrontLayout() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [categories, setCategories] = useState([]);
+  const [searchSuggestions, setSearchSuggestions] = useState([]);
+  const [searching, setSearching] = useState(false);
+  const deferredSearch = useDeferredValue(searchQuery);
 
   useEffect(() => {
     API.get('/categories')
-      .then((response) => setCategories(extractApiData(response).slice(0, 5)))
+      .then((response) => setCategories(extractApiData(response).slice(0, 6)))
       .catch(() => {});
   }, []);
 
@@ -42,12 +49,44 @@ export default function StorefrontLayout() {
     setUserMenuOpen(false);
   }, [location.pathname, location.search]);
 
+  useEffect(() => {
+    const nextQuery = deferredSearch.trim();
+
+    if (nextQuery.length < 2) {
+      setSearchSuggestions([]);
+      return;
+    }
+
+    let active = true;
+    setSearching(true);
+
+    API.get(`/products?search=${encodeURIComponent(nextQuery)}&limit=5`)
+      .then((response) => {
+        if (active) {
+          setSearchSuggestions(extractApiData(response));
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setSearchSuggestions([]);
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setSearching(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [deferredSearch]);
+
   const handleSearch = (event) => {
     event.preventDefault();
 
     if (searchQuery.trim()) {
       navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery('');
     }
   };
 
@@ -55,6 +94,8 @@ export default function StorefrontLayout() {
     () => [
       { label: 'All products', href: '/products', accent: 'default' },
       { label: 'Featured', href: '/products?featured=true', accent: 'gaming' },
+      { label: 'New arrivals', href: '/products?sort=newest', accent: 'smartphones' },
+      { label: 'Best sellers', href: '/products?sort=popular', accent: 'audio' },
       ...categories.map((category) => ({
         label: category.name,
         href: `/products?category=${category.slug}`,
@@ -66,22 +107,31 @@ export default function StorefrontLayout() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <div className="border-b border-slate-800 bg-slate-950 text-slate-200">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 text-xs uppercase tracking-[0.22em] sm:px-6 lg:px-8">
-          <span>Free shipping over $99</span>
-          <span className="hidden md:block">Use TECHZONE10 during checkout for demo coupon coverage</span>
-          <Link to="/products?featured=true" className="font-semibold text-cyan-300 transition hover:text-white">
-            Explore featured gear
-          </Link>
+    <div className="min-h-screen bg-transparent text-slate-900">
+      <div className="border-b border-slate-200/70 bg-white/70 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap items-center gap-4">
+            <span className="inline-flex items-center gap-2">
+              <FiTruck size={13} />
+              Free shipping over $99
+            </span>
+            <span className="hidden items-center gap-2 md:inline-flex">
+              <FiShield size={13} />
+              Protected checkout
+            </span>
+          </div>
+          <span className="hidden items-center gap-2 text-slate-700 md:inline-flex">
+            <FiStar size={13} />
+            Weekly drops across audio, gaming, and smart home
+          </span>
         </div>
       </div>
 
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-[rgba(251,247,240,0.88)] backdrop-blur-2xl">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex min-h-[76px] items-center gap-4">
+          <div className="flex min-h-[82px] items-center gap-4">
             <Link to="/" className="flex shrink-0 items-center gap-3">
-              <div className="rounded-2xl bg-slate-950 p-2.5 text-white shadow-lg shadow-slate-950/20">
+              <div className="rounded-[18px] bg-slate-950 p-2.5 text-white shadow-lg shadow-slate-950/15">
                 <MdElectricBolt className="text-2xl" />
               </div>
               <div>
@@ -91,13 +141,13 @@ export default function StorefrontLayout() {
                 >
                   TechZone
                 </span>
-                <span className="block text-xs uppercase tracking-[0.22em] text-slate-400">
-                  Premium electronics
+                <span className="block text-xs uppercase tracking-[0.26em] text-slate-400">
+                  Curated electronics
                 </span>
               </div>
             </Link>
 
-            <form onSubmit={handleSearch} className="hidden flex-1 md:block">
+            <form onSubmit={handleSearch} className="relative hidden flex-1 md:block">
               <div className="relative mx-auto max-w-2xl">
                 <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
@@ -105,21 +155,56 @@ export default function StorefrontLayout() {
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
                   placeholder="Search products, brands, and categories"
-                  className="h-12 w-full rounded-full border border-slate-200 bg-slate-50 pl-12 pr-28 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                  className="input h-12 w-full rounded-full bg-white/85 pl-12 pr-28"
                 />
                 <button
                   type="submit"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
+                  className="btn-primary absolute right-1.5 top-1.5 h-9 px-4 text-xs uppercase tracking-[0.16em]"
                 >
                   Search
                 </button>
               </div>
+
+              {deferredSearch.trim().length >= 2 ? (
+                <div className="absolute left-1/2 top-full z-40 mt-3 w-full max-w-2xl -translate-x-1/2 overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-2xl shadow-slate-900/10">
+                  <div className="border-b border-slate-100 px-5 py-3 text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+                    {searching ? 'Searching...' : 'Suggested results'}
+                  </div>
+                  <div className="p-2">
+                    {searchSuggestions.length ? (
+                      searchSuggestions.map((product) => (
+                        <button
+                          key={product.id}
+                          type="button"
+                          onClick={() => {
+                            navigate(getProductHref(product));
+                            setSearchQuery('');
+                          }}
+                          className="flex w-full items-center justify-between gap-4 rounded-[20px] px-4 py-3 text-left transition hover:bg-slate-50"
+                        >
+                          <div>
+                            <p className="font-semibold text-slate-900">{product.name}</p>
+                            <p className="mt-1 text-sm text-slate-500">{product.brand}</p>
+                          </div>
+                          <span className="text-sm font-semibold text-slate-900">
+                            {formatCurrency(product.price)}
+                          </span>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-4 py-6 text-sm text-slate-500">
+                        No direct matches yet. Try a product name, brand, or category.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : null}
             </form>
 
             <div className="ml-auto flex items-center gap-2">
               <NavLink
                 to="/wishlist"
-                className="relative hidden h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-slate-700 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 md:inline-flex"
+                className="relative hidden h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white/85 text-slate-700 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 md:inline-flex"
               >
                 <FiHeart />
                 {wishlistCount > 0 ? (
@@ -131,7 +216,7 @@ export default function StorefrontLayout() {
 
               <NavLink
                 to="/cart"
-                className="relative inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-slate-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                className="relative inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white/85 text-slate-700 transition hover:border-teal-200 hover:bg-teal-50 hover:text-teal-700"
               >
                 <FiShoppingCart />
                 {count > 0 ? (
@@ -146,9 +231,9 @@ export default function StorefrontLayout() {
                   <button
                     type="button"
                     onClick={() => setUserMenuOpen((current) => !current)}
-                    className="inline-flex items-center gap-3 rounded-full border border-slate-200 px-3 py-2 transition hover:border-slate-300 hover:bg-slate-50"
+                    className="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white/85 px-3 py-2 transition hover:border-slate-300 hover:bg-slate-50"
                   >
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-950 text-sm font-semibold text-white">
                       {user.name?.[0]?.toUpperCase() || 'U'}
                     </div>
                     <div className="hidden text-left md:block">
@@ -190,7 +275,7 @@ export default function StorefrontLayout() {
                         {isAdmin ? (
                           <Link
                             to="/admin"
-                            className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-blue-700 transition hover:bg-blue-50"
+                            className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-teal-700 transition hover:bg-teal-50"
                           >
                             <FiSettings /> Admin console
                           </Link>
@@ -210,13 +295,13 @@ export default function StorefrontLayout() {
                 <div className="hidden items-center gap-2 md:flex">
                   <Link
                     to="/login"
-                    className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                    className="btn-secondary h-11 px-4"
                   >
                     Sign in
                   </Link>
                   <Link
                     to="/register"
-                    className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
+                    className="btn-primary h-11 px-4"
                   >
                     Create account
                   </Link>
@@ -234,7 +319,7 @@ export default function StorefrontLayout() {
           </div>
         </div>
 
-        <div className="hidden border-t border-slate-100 bg-white md:block">
+        <div className="hidden border-t border-slate-200/70 bg-transparent md:block">
           <div className="mx-auto flex max-w-7xl items-center gap-2 overflow-x-auto px-4 py-3 sm:px-6 lg:px-8">
             {navLinks.map((link) => {
               const theme = getCategoryTheme(link.accent);
@@ -247,7 +332,7 @@ export default function StorefrontLayout() {
                     `inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${
                       isActive
                         ? `${theme.surface} border-transparent`
-                        : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900'
+                        : 'border-slate-200 bg-white/75 text-slate-600 hover:border-slate-300 hover:bg-white hover:text-slate-900'
                     }`
                   }
                 >
@@ -266,7 +351,7 @@ export default function StorefrontLayout() {
         </div>
 
         {mobileOpen ? (
-          <div className="border-t border-slate-100 bg-white px-4 py-4 md:hidden">
+          <div className="border-t border-slate-200/70 bg-[#fbf7f0] px-4 py-4 md:hidden">
             <form onSubmit={handleSearch} className="relative">
               <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
@@ -274,7 +359,7 @@ export default function StorefrontLayout() {
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 placeholder="Search catalog"
-                className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-12 pr-4 text-sm outline-none transition focus:border-blue-500 focus:bg-white"
+                className="input h-12 w-full rounded-2xl bg-white pl-12 pr-4"
               />
             </form>
             <div className="mt-4 grid gap-2">
@@ -286,7 +371,7 @@ export default function StorefrontLayout() {
                     `rounded-2xl px-4 py-3 text-sm font-medium transition ${
                       isActive
                         ? 'bg-slate-950 text-white'
-                        : 'border border-slate-200 text-slate-700 hover:bg-slate-50'
+                        : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
                     }`
                   }
                 >
@@ -298,13 +383,13 @@ export default function StorefrontLayout() {
               <div className="mt-4 grid grid-cols-2 gap-2">
                 <Link
                   to="/login"
-                  className="rounded-2xl border border-slate-200 px-4 py-3 text-center text-sm font-semibold text-slate-700"
+                  className="btn-secondary rounded-2xl"
                 >
                   Sign in
                 </Link>
                 <Link
                   to="/register"
-                  className="rounded-2xl bg-slate-950 px-4 py-3 text-center text-sm font-semibold text-white"
+                  className="btn-primary rounded-2xl"
                 >
                   Join now
                 </Link>
@@ -318,8 +403,43 @@ export default function StorefrontLayout() {
         <Outlet />
       </main>
 
-      <footer className="mt-20 border-t border-slate-200 bg-white">
+      <footer className="mt-20 border-t border-slate-200/70 bg-white/75 backdrop-blur-xl">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+          <div className="mb-12 grid gap-8 rounded-[40px] bg-slate-950 px-8 py-10 text-white shadow-2xl shadow-slate-900/15 lg:grid-cols-[1.15fr_0.85fr]">
+            <div>
+              <p className="section-kicker text-slate-400">Need help deciding?</p>
+              <h2 className="mt-4 max-w-2xl text-4xl font-bold tracking-[-0.04em]">
+                Build a smarter setup with curated gear and a cleaner checkout journey.
+              </h2>
+              <p className="mt-4 max-w-2xl text-base leading-8 text-slate-300">
+                Explore laptops, smartphones, wearables, audio, and smart-home products with faster discovery, saved lists, and a more confident path to purchase.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link to="/products" className="btn-primary">
+                  Explore catalog
+                </Link>
+                <Link
+                  to="/products?featured=true"
+                  className="btn-secondary border-white/15 bg-white/5 text-white hover:bg-white/10"
+                >
+                  Shop featured picks
+                </Link>
+              </div>
+            </div>
+
+            <div className="grid gap-3">
+              {[
+                'Free shipping on qualifying baskets and a transparent order total before payment.',
+                'Save favorites, compare products, and return to checkout without losing your cart.',
+                'Protected checkout with trusted delivery messaging and order tracking.',
+              ].map((item) => (
+                <div key={item} className="rounded-[24px] border border-white/10 bg-white/5 px-5 py-4 text-sm leading-7 text-slate-200">
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+
           <div className="grid gap-10 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
             <div>
               <div className="flex items-center gap-3">
@@ -337,7 +457,7 @@ export default function StorefrontLayout() {
                 </div>
               </div>
               <p className="mt-6 max-w-md text-sm leading-7 text-slate-600">
-                Shop a seeded demo storefront with laptops, smartphones, gaming gear, smart-home devices, and accessories backed by a production-ready MySQL API.
+                TechZone is built around confident product discovery, a fast cart-to-checkout journey, and a cleaner way to browse premium electronics.
               </p>
             </div>
 
@@ -388,18 +508,21 @@ export default function StorefrontLayout() {
                 Support
               </h3>
               <div className="mt-5 space-y-3 text-sm text-slate-600">
-                <p>Seed data includes demo orders, reviews, coupons, and inventory for local testing.</p>
-                <p>Frontend is ready for Netlify or Vercel deployment with an external MySQL-backed API.</p>
+                <p>Delivery and returns</p>
+                <p>Warranty coverage</p>
                 <p className="font-medium text-slate-950">support@techzone.dev</p>
               </div>
             </div>
           </div>
 
           <div className="mt-12 flex flex-col gap-3 border-t border-slate-200 pt-6 text-sm text-slate-500 md:flex-row md:items-center md:justify-between">
-            <p>TechZone eCommerce demo. Built for a clean fullstack deployment flow.</p>
+            <p>TechZone storefront experience, redesigned for faster discovery and higher-conversion checkout.</p>
             <div className="flex items-center gap-5">
               <Link to="/products" className="transition hover:text-slate-950">
                 Catalog
+              </Link>
+              <Link to="/wishlist" className="transition hover:text-slate-950">
+                Wishlist
               </Link>
               <Link to="/checkout" className="transition hover:text-slate-950">
                 Checkout

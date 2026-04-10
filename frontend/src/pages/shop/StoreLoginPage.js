@@ -1,8 +1,35 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FiEye, FiEyeOff, FiLock, FiMail } from 'react-icons/fi';
+import {
+  FiArrowRight,
+  FiCheckCircle,
+  FiEye,
+  FiEyeOff,
+  FiLock,
+  FiMail,
+  FiShield,
+  FiTruck,
+} from 'react-icons/fi';
 import { MdElectricBolt } from 'react-icons/md';
 import { useAuth } from '../../context/AuthContext';
+
+const TRUST_POINTS = [
+  {
+    icon: FiShield,
+    title: 'Protected account access',
+    description: 'Secure sessions, saved addresses, and a faster route into checkout.',
+  },
+  {
+    icon: FiTruck,
+    title: 'Faster repeat orders',
+    description: 'Keep your cart, saved products, and recent order history in one place.',
+  },
+  {
+    icon: FiCheckCircle,
+    title: 'Cleaner buying flow',
+    description: 'Jump back into the catalog, wishlist, or order tracking without friction.',
+  },
+];
 
 export default function StoreLoginPage() {
   const { login, loading } = useAuth();
@@ -25,65 +52,97 @@ export default function StoreLoginPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-160px)] bg-slate-50 px-4 py-16 sm:px-6 lg:px-8">
-      <div className="mx-auto grid max-w-6xl overflow-hidden rounded-[40px] border border-slate-200 bg-white shadow-2xl shadow-slate-900/10 lg:grid-cols-[0.95fr_1.05fr]">
-        <div className="hidden bg-slate-950 p-12 text-white lg:block">
-          <div className="inline-flex rounded-2xl bg-cyan-400/15 p-4 text-cyan-300">
-            <MdElectricBolt className="text-4xl" />
-          </div>
-          <h1 className="mt-8 text-5xl font-bold" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-            Welcome back
-          </h1>
-          <p className="mt-5 max-w-md text-lg leading-8 text-slate-300">
-            Sign in to manage saved items, addresses, and order history across the upgraded TechZone storefront.
-          </p>
-          <div className="mt-10 grid gap-4">
-            {[
-              'Customer demo: aisha.khan@example.com / User@1234',
-              'Admin demo: admin@techzone.com / Admin@1234',
-            ].map((line) => (
-              <div key={line} className="rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-sm text-slate-200">
-                {line}
-              </div>
-            ))}
-          </div>
-        </div>
+    <div className="auth-backdrop min-h-[calc(100vh-160px)] px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+        <section className="panel relative overflow-hidden rounded-[36px] bg-slate-950 p-8 text-white shadow-2xl shadow-slate-950/15 sm:p-10 lg:p-12">
+          <div className="floating-blur left-[-60px] top-[-80px] h-40 w-40 bg-[rgba(255,195,113,0.28)]" />
+          <div className="floating-blur bottom-[-90px] right-[-40px] h-52 w-52 bg-[rgba(45,212,191,0.22)]" />
 
-        <div className="p-8 sm:p-12">
-          <div className="mx-auto max-w-md">
+          <div className="relative">
             <Link to="/" className="inline-flex items-center gap-3">
-              <div className="rounded-2xl bg-slate-950 p-2.5 text-white">
+              <div className="rounded-[18px] bg-white/10 p-3 text-white">
                 <MdElectricBolt className="text-2xl" />
               </div>
               <div>
-                <p className="text-lg font-bold text-slate-950" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+                <p className="text-lg font-bold text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
                   TechZone
                 </p>
-                <p className="text-xs uppercase tracking-[0.22em] text-slate-400">
-                  Customer login
+                <p className="text-xs uppercase tracking-[0.24em] text-slate-400">
+                  Account access
                 </p>
               </div>
             </Link>
 
-            <div className="mt-12">
-              <h2 className="text-3xl font-bold text-slate-950" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-                Sign in
-              </h2>
-              <p className="mt-3 text-slate-500">
-                Access your account to continue checkout and manage orders.
+            <div className="mt-10 max-w-2xl">
+              <p className="section-kicker text-amber-200">Welcome back</p>
+              <h1
+                className="headline-balance mt-4 text-4xl font-bold leading-tight text-white sm:text-5xl"
+                style={{ fontFamily: 'Space Grotesk, sans-serif' }}
+              >
+                Pick up where you left off, with a faster path from login to checkout.
+              </h1>
+              <p className="mt-5 max-w-xl text-base leading-8 text-slate-300 sm:text-lg">
+                Sign in to review saved items, manage delivery details, and get back into the storefront without losing momentum.
               </p>
             </div>
+
+            <div className="mt-10 grid gap-4">
+              {TRUST_POINTS.map(({ icon: Icon, title, description }) => (
+                <div
+                  key={title}
+                  className="glass-panel flex items-start gap-4 rounded-[28px] border border-white/10 px-5 py-5"
+                >
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-white">
+                    <Icon size={18} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white">{title}</p>
+                    <p className="mt-2 text-sm leading-7 text-slate-300">{description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-10 rounded-[28px] border border-white/10 bg-white/5 px-5 py-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+                New here?
+              </p>
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                <p className="max-w-md text-sm leading-7 text-slate-300">
+                  Create an account to save your wishlist, speed up checkout, and keep all your orders in one dashboard.
+                </p>
+                <Link to="/register" className="inline-flex items-center gap-2 text-sm font-semibold text-white">
+                  Create account
+                  <FiArrowRight />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="panel rounded-[36px] px-6 py-8 sm:px-10 sm:py-10">
+          <div className="mx-auto max-w-lg">
+            <p className="section-kicker">Sign in</p>
+            <h2
+              className="mt-4 text-3xl font-bold text-slate-950 sm:text-4xl"
+              style={{ fontFamily: 'Space Grotesk, sans-serif' }}
+            >
+              Access your account
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-base">
+              Continue to checkout, review orders, and manage saved products from one place.
+            </p>
 
             <form onSubmit={handleSubmit} className="mt-8 space-y-5">
               <div>
                 <label className="mb-2 block text-sm font-semibold text-slate-700">Email address</label>
-                <div className="relative">
-                  <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                <div className="input-shell">
+                  <FiMail className="text-slate-400" />
                   <input
                     type="email"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
-                    className="h-12 w-full rounded-2xl border border-slate-200 pl-11 pr-4 text-sm outline-none transition focus:border-blue-500"
+                    className="input h-12 flex-1 border-0 bg-transparent px-0 shadow-none focus:ring-0"
                     placeholder="you@example.com"
                     required
                   />
@@ -92,43 +151,50 @@ export default function StoreLoginPage() {
 
               <div>
                 <label className="mb-2 block text-sm font-semibold text-slate-700">Password</label>
-                <div className="relative">
-                  <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                <div className="input-shell">
+                  <FiLock className="text-slate-400" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
-                    className="h-12 w-full rounded-2xl border border-slate-200 pl-11 pr-12 text-sm outline-none transition focus:border-blue-500"
+                    className="input h-12 flex-1 border-0 bg-transparent px-0 shadow-none focus:ring-0"
                     placeholder="Enter your password"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((current) => !current)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-600"
+                    className="text-slate-400 transition hover:text-slate-700"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? <FiEyeOff /> : <FiEye />}
                   </button>
                 </div>
               </div>
 
+              <div className="rounded-[28px] bg-[rgba(15,23,42,0.04)] px-5 py-4 text-sm leading-7 text-slate-600">
+                Signing in keeps your cart, wishlist, and saved delivery details synced across the storefront.
+              </div>
+
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
+                className="btn-primary h-12 w-full justify-center"
               >
                 {loading ? 'Signing in...' : 'Sign in'}
               </button>
             </form>
 
-            <p className="mt-8 text-sm text-slate-500">
+            <div className="store-divider my-8" />
+
+            <p className="text-sm text-slate-600">
               Need an account?{' '}
-              <Link to="/register" className="font-semibold text-blue-700">
+              <Link to="/register" className="font-semibold text-slate-950 underline-offset-4 hover:underline">
                 Create one
               </Link>
             </p>
           </div>
-        </div>
+        </section>
       </div>
     </div>
   );

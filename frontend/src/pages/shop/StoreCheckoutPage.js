@@ -3,16 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import { FiCreditCard, FiMapPin, FiPlusCircle, FiShield, FiTruck } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import API, { extractApiData } from '../../utils/api';
+import Breadcrumbs from '../../components/ui/Breadcrumbs';
+import EmptyState from '../../components/ui/EmptyState';
+import SectionHeading from '../../components/ui/SectionHeading';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { getProductImage } from '../../utils/catalog';
 import { formatCurrency } from '../../utils/format';
 
 const PAYMENT_METHODS = [
-  { id: 'card', title: 'Credit or debit card', description: 'Demo-ready payment flow' },
-  { id: 'upi', title: 'UPI', description: 'Great for local demo flows' },
-  { id: 'paypal', title: 'PayPal', description: 'External wallet option' },
-  { id: 'cod', title: 'Cash on delivery', description: 'Collected on delivery' },
+  { id: 'card', title: 'Credit or debit card', description: 'Fastest option for most shoppers' },
+  { id: 'upi', title: 'UPI', description: 'Quick local checkout with fewer steps' },
+  { id: 'paypal', title: 'PayPal', description: 'Use your wallet or linked cards' },
+  { id: 'cod', title: 'Cash on delivery', description: 'Pay when the order arrives' },
 ];
 
 const emptyAddress = (user) => ({
@@ -144,38 +147,64 @@ export default function StoreCheckoutPage() {
 
   if (!items.length) {
     return (
-      <div className="mx-auto max-w-4xl px-4 py-20 text-center sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-slate-950" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-          Your cart is empty
-        </h1>
-        <p className="mt-4 text-slate-500">
-          Add some products before moving into checkout.
-        </p>
-        <button
-          type="button"
-          onClick={() => navigate('/cart')}
-          className="mt-8 inline-flex rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
-        >
-          Back to cart
-        </button>
+      <div className="page-shell">
+        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+          <EmptyState
+            icon={FiTruck}
+            title="Your checkout is waiting on a basket"
+            description="Add products to the cart first, then come back here for a cleaner address, payment, and order review experience."
+            action={
+              <button type="button" onClick={() => navigate('/cart')} className="btn-primary">
+                Back to cart
+              </button>
+            }
+          />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-8 rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
-        <h1 className="text-3xl font-bold text-slate-950" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-          Checkout
-        </h1>
-        <p className="mt-2 text-sm text-slate-500">
-          Complete your order with shipping, coupon, and payment details.
-        </p>
-      </div>
+    <div className="page-shell">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <section className="panel rounded-[36px] px-6 py-8 sm:px-8 sm:py-10">
+          <Breadcrumbs
+            items={[
+              { label: 'Home', href: '/' },
+              { label: 'Cart', href: '/cart' },
+              { label: 'Checkout' },
+            ]}
+          />
+          <div className="mt-6 grid gap-6 lg:grid-cols-[1.12fr_0.88fr]">
+            <SectionHeading
+              eyebrow="Checkout"
+              title="Complete the order with less friction"
+              description="The flow is structured around fast address selection, low-stress payment choices, and a transparent order summary that stays visible as you finish the purchase."
+              align="start"
+            />
+            <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+              <div className="rounded-[26px] bg-[rgba(15,23,42,0.04)] px-4 py-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Delivery</p>
+                <p className="mt-3 text-base font-semibold text-slate-950">Saved addresses first</p>
+                <p className="mt-1 text-sm text-slate-500">Pick a default address or add a new one inline.</p>
+              </div>
+              <div className="rounded-[26px] bg-[rgba(15,23,42,0.04)] px-4 py-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Payment</p>
+                <p className="mt-3 text-base font-semibold text-slate-950">Flexible methods</p>
+                <p className="mt-1 text-sm text-slate-500">Choose the payment route that fits the shopper.</p>
+              </div>
+              <div className="rounded-[26px] bg-[rgba(15,23,42,0.04)] px-4 py-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Transparency</p>
+                <p className="mt-3 text-base font-semibold text-slate-950">Total stays visible</p>
+                <p className="mt-1 text-sm text-slate-500">Shipping, tax, and discounts are shown before payment.</p>
+              </div>
+            </div>
+          </div>
+        </section>
 
-      <form onSubmit={handlePlaceOrder} className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
-        <div className="space-y-6">
-          <section className="rounded-[36px] border border-slate-200 bg-white p-6 shadow-sm">
+        <form onSubmit={handlePlaceOrder} className="mt-8 grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
+          <div className="space-y-6">
+          <section className="panel rounded-[36px] p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-2xl font-bold text-slate-950" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
@@ -188,7 +217,7 @@ export default function StoreCheckoutPage() {
               <button
                 type="button"
                 onClick={() => setShowNewAddress((current) => !current)}
-                className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                className="btn-secondary h-10 px-4"
               >
                 <FiPlusCircle />
                 {showNewAddress ? 'Hide form' : 'Add new address'}
@@ -238,62 +267,62 @@ export default function StoreCheckoutPage() {
                 </div>
 
                 {showNewAddress ? (
-                  <div className="mt-6 rounded-[32px] border border-slate-200 bg-slate-50 p-6">
+                  <div className="panel-muted mt-6 rounded-[32px] p-6">
                     <h3 className="text-lg font-semibold text-slate-950">New address</h3>
                     <div className="mt-4 grid gap-4 sm:grid-cols-2">
                       <input
                         value={addressForm.label}
                         onChange={(event) => setAddressForm((current) => ({ ...current, label: event.target.value }))}
                         placeholder="Label"
-                        className="h-12 rounded-2xl border border-slate-200 px-4 text-sm outline-none transition focus:border-blue-500"
+                        className="input h-12"
                       />
                       <input
                         value={addressForm.fullName}
                         onChange={(event) => setAddressForm((current) => ({ ...current, fullName: event.target.value }))}
                         placeholder="Full name"
-                        className="h-12 rounded-2xl border border-slate-200 px-4 text-sm outline-none transition focus:border-blue-500"
+                        className="input h-12"
                       />
                       <input
                         value={addressForm.phone}
                         onChange={(event) => setAddressForm((current) => ({ ...current, phone: event.target.value }))}
                         placeholder="Phone"
-                        className="h-12 rounded-2xl border border-slate-200 px-4 text-sm outline-none transition focus:border-blue-500"
+                        className="input h-12"
                       />
                       <input
                         value={addressForm.country}
                         onChange={(event) => setAddressForm((current) => ({ ...current, country: event.target.value }))}
                         placeholder="Country"
-                        className="h-12 rounded-2xl border border-slate-200 px-4 text-sm outline-none transition focus:border-blue-500"
+                        className="input h-12"
                       />
                       <input
                         value={addressForm.line1}
                         onChange={(event) => setAddressForm((current) => ({ ...current, line1: event.target.value }))}
                         placeholder="Address line 1"
-                        className="h-12 rounded-2xl border border-slate-200 px-4 text-sm outline-none transition focus:border-blue-500 sm:col-span-2"
+                        className="input h-12 sm:col-span-2"
                       />
                       <input
                         value={addressForm.line2}
                         onChange={(event) => setAddressForm((current) => ({ ...current, line2: event.target.value }))}
                         placeholder="Address line 2"
-                        className="h-12 rounded-2xl border border-slate-200 px-4 text-sm outline-none transition focus:border-blue-500 sm:col-span-2"
+                        className="input h-12 sm:col-span-2"
                       />
                       <input
                         value={addressForm.city}
                         onChange={(event) => setAddressForm((current) => ({ ...current, city: event.target.value }))}
                         placeholder="City"
-                        className="h-12 rounded-2xl border border-slate-200 px-4 text-sm outline-none transition focus:border-blue-500"
+                        className="input h-12"
                       />
                       <input
                         value={addressForm.state}
                         onChange={(event) => setAddressForm((current) => ({ ...current, state: event.target.value }))}
                         placeholder="State"
-                        className="h-12 rounded-2xl border border-slate-200 px-4 text-sm outline-none transition focus:border-blue-500"
+                        className="input h-12"
                       />
                       <input
                         value={addressForm.postalCode}
                         onChange={(event) => setAddressForm((current) => ({ ...current, postalCode: event.target.value }))}
                         placeholder="Postal code"
-                        className="h-12 rounded-2xl border border-slate-200 px-4 text-sm outline-none transition focus:border-blue-500"
+                        className="input h-12"
                       />
                       <label className="inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
                         <input
@@ -311,7 +340,7 @@ export default function StoreCheckoutPage() {
             )}
           </section>
 
-          <section className="rounded-[36px] border border-slate-200 bg-white p-6 shadow-sm">
+          <section className="panel rounded-[36px] p-6">
             <h2 className="text-2xl font-bold text-slate-950" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
               Payment method
             </h2>
@@ -339,7 +368,7 @@ export default function StoreCheckoutPage() {
             </div>
           </section>
 
-          <section className="rounded-[36px] border border-slate-200 bg-white p-6 shadow-sm">
+          <section className="panel rounded-[36px] p-6">
             <h2 className="text-2xl font-bold text-slate-950" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
               Order notes
             </h2>
@@ -348,15 +377,16 @@ export default function StoreCheckoutPage() {
               onChange={(event) => setNotes(event.target.value)}
               rows={4}
               placeholder="Delivery notes, apartment info, or anything the team should know."
-              className="mt-4 w-full rounded-[28px] border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-blue-500"
+              className="input mt-4 min-h-[120px] w-full rounded-[28px] px-4 py-3"
             />
           </section>
         </div>
 
         <div>
-          <div className="sticky top-28 rounded-[36px] border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-2xl font-bold text-slate-950" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-              Order summary
+          <div className="panel sticky top-28 rounded-[36px] p-6">
+            <p className="section-kicker">Order summary</p>
+            <h2 className="mt-3 text-2xl font-bold text-slate-950" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+              Review the order before placing it
             </h2>
 
             <div className="mt-6 space-y-3">
@@ -378,7 +408,7 @@ export default function StoreCheckoutPage() {
               ))}
             </div>
 
-            <div className="mt-6 rounded-[32px] bg-slate-50 p-5">
+            <div className="panel-muted mt-6 rounded-[32px] p-5">
               <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
                 <FiMapPin />
                 Coupon
@@ -388,13 +418,13 @@ export default function StoreCheckoutPage() {
                   value={couponCode}
                   onChange={(event) => setCouponCode(event.target.value.toUpperCase())}
                   placeholder="Enter coupon code"
-                  className="h-12 flex-1 rounded-2xl border border-slate-200 px-4 text-sm outline-none transition focus:border-blue-500"
+                  className="input h-12 flex-1"
                 />
                 <button
                   type="button"
                   onClick={handleApplyCoupon}
                   disabled={validatingCoupon}
-                  className="rounded-full bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
+                  className="btn-primary px-4 disabled:opacity-50"
                 >
                   {validatingCoupon ? 'Checking' : 'Apply'}
                 </button>
@@ -435,24 +465,25 @@ export default function StoreCheckoutPage() {
             <button
               type="submit"
               disabled={placingOrder}
-              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-950 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
+              className="btn-primary mt-6 h-12 w-full justify-center disabled:opacity-50"
             >
               <FiTruck />
               {placingOrder ? 'Placing order...' : 'Place order'}
             </button>
 
-            <div className="mt-4 rounded-3xl bg-slate-50 p-4 text-sm text-slate-600">
+            <div className="panel-muted mt-4 rounded-3xl p-4 text-sm text-slate-600">
               <div className="flex items-center gap-2 font-semibold text-slate-900">
                 <FiShield />
                 Secure checkout
               </div>
               <p className="mt-2">
-                Payment flow is seeded for demo usage and can be connected to a live provider later.
+                Payment options stay visible and easy to compare so shoppers can choose the route that feels most comfortable.
               </p>
             </div>
           </div>
         </div>
       </form>
+      </div>
     </div>
   );
 }
