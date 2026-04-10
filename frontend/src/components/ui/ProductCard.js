@@ -25,17 +25,17 @@ export default function ProductCard({ product, layout = 'grid' }) {
   return (
     <article
       className={`card product-card group overflow-hidden ${
-        isList ? 'grid gap-0 md:grid-cols-[300px_1fr]' : 'flex h-full flex-col'
+        isList ? 'grid gap-0 md:grid-cols-[240px_1fr]' : 'flex h-full flex-col'
       }`}
     >
-      <div className="relative overflow-hidden bg-[#f4efe6]">
+      <div className="relative overflow-hidden bg-[#f7f9fc]">
         <Link to={href} className="block h-full">
-          <div className={isList ? 'h-full min-h-[280px]' : 'aspect-[0.94]'}>
+          <div className={isList ? 'h-full min-h-[220px]' : 'aspect-square'}>
             <img
               src={imageUrl}
               alt={product.name}
               loading="lazy"
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              className="h-full w-full object-contain p-5 transition-transform duration-300 group-hover:scale-105 sm:p-6"
               onError={(event) => {
                 event.target.src = `https://picsum.photos/seed/fallback-${productId}/800/800`;
               }}
@@ -46,12 +46,12 @@ export default function ProductCard({ product, layout = 'grid' }) {
         <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-4">
           <div className="flex flex-wrap gap-2">
             {discount > 0 ? (
-              <span className="pill rounded-full bg-rose-600/95 px-3 py-1 text-[11px] tracking-[0.18em] text-white">
-                Save {discount}%
+              <span className="rounded-md bg-[#fff1df] px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-[#9a4b00]">
+                {discount}% off
               </span>
             ) : null}
             {product.isFeatured ? (
-              <span className="pill rounded-full bg-white/90 px-3 py-1 text-[11px] tracking-[0.18em] text-slate-900">
+              <span className="rounded-md bg-white px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-[#2874f0] shadow-sm">
                 Featured
               </span>
             ) : null}
@@ -60,10 +60,10 @@ export default function ProductCard({ product, layout = 'grid' }) {
           <button
             type="button"
             onClick={() => toggleWishlist(productId)}
-            className={`pointer-events-auto inline-flex h-11 w-11 items-center justify-center rounded-full border transition ${
+            className={`pointer-events-auto inline-flex h-10 w-10 items-center justify-center rounded-lg border transition ${
               saved
                 ? 'border-rose-200 bg-rose-50 text-rose-600'
-                : 'border-white/80 bg-white/88 text-slate-600 hover:text-rose-600'
+                : 'border-slate-200 bg-white text-slate-600 hover:text-rose-600'
             }`}
             aria-label={saved ? 'Remove from wishlist' : 'Save to wishlist'}
           >
@@ -80,19 +80,19 @@ export default function ProductCard({ product, layout = 'grid' }) {
         ) : null}
       </div>
 
-      <div className={`flex flex-1 flex-col ${isList ? 'p-6 md:p-7' : 'p-5 sm:p-6'}`}>
-        <div className="flex flex-wrap items-center justify-between gap-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+      <div className={`flex flex-1 flex-col ${isList ? 'p-5 md:p-6' : 'p-4 sm:p-5'}`}>
+        <div className="flex flex-wrap items-center justify-between gap-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
           <span>{product.brand}</span>
           {product.category?.name ? <span>{product.category.name}</span> : null}
         </div>
 
-        <div className="mt-4 space-y-3">
+        <div className="mt-3 space-y-2.5">
           <Link to={href}>
-            <h3 className={`${isList ? 'text-2xl' : 'text-lg'} font-bold leading-tight text-slate-950 transition group-hover:text-teal-700`}>
+            <h3 className={`${isList ? 'text-xl sm:text-2xl' : 'text-base sm:text-lg'} font-bold leading-snug text-slate-950 transition group-hover:text-[#2874f0]`}>
               {product.name}
             </h3>
           </Link>
-          <p className={`${isList ? 'max-w-2xl' : ''} text-sm leading-7 text-slate-600`}>
+          <p className={`${isList ? 'max-w-2xl' : ''} text-sm leading-6 text-slate-600`}>
             {product.shortDescription || product.description}
           </p>
           <RatingStars
@@ -102,47 +102,45 @@ export default function ProductCard({ product, layout = 'grid' }) {
           />
         </div>
 
-        <div className={`mt-5 flex flex-wrap items-center gap-2 ${isList ? 'order-last mt-6' : ''}`}>
+        <div className={`mt-4 flex flex-wrap items-center gap-2 ${isList ? 'order-last mt-5' : ''}`}>
           {isLowStock(product) ? (
-            <span className="rounded-full bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-800">
+            <span className="rounded-md bg-[#fff1df] px-2.5 py-1.5 text-xs font-semibold text-[#9a4b00]">
               Only {product.stockQuantity} left
             </span>
           ) : (
-            <span className="rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-800">
+            <span className="rounded-md bg-[#e9f8ee] px-2.5 py-1.5 text-xs font-semibold text-[#167c3b]">
               {outOfStock ? 'Back soon' : 'Ready to ship'}
             </span>
           )}
           {!outOfStock && product.stockQuantity ? (
-            <span className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600">
+            <span className="rounded-md bg-slate-100 px-2.5 py-1.5 text-xs font-medium text-slate-600">
               {product.stockQuantity} in stock
             </span>
           ) : null}
         </div>
 
-        <div className={`mt-6 flex flex-wrap items-end justify-between gap-4 ${isList ? 'mt-auto pt-6' : ''}`}>
+        <div className={`mt-5 flex flex-wrap items-end justify-between gap-4 border-t border-slate-100 pt-4 ${isList ? 'mt-auto' : ''}`}>
           <div>
-            <div className="text-2xl font-bold text-slate-950">{formatCurrency(product.price)}</div>
+            <div className="text-2xl font-extrabold text-slate-950">{formatCurrency(product.price)}</div>
             {compareAtPrice ? (
               <div className="mt-1 text-sm text-slate-400 line-through">{formatCurrency(compareAtPrice)}</div>
             ) : null}
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className={`flex flex-wrap gap-2 ${isList ? '' : 'w-full sm:w-auto'}`}>
             <button
               type="button"
               onClick={() => addItem(product, 1)}
               disabled={outOfStock}
-              className="btn-primary h-11 px-4 disabled:bg-slate-200 disabled:text-slate-500"
+              className={`btn-primary ${isList ? 'h-11 px-4' : 'h-11 flex-1 justify-center px-4'} disabled:bg-slate-200 disabled:text-slate-500`}
             >
               <FiShoppingCart />
-              Quick add
+              Add to cart
             </button>
-            {isList ? (
-              <Link to={href} className="btn-secondary h-11 px-4">
-                View details
-                <FiArrowRight size={16} />
-              </Link>
-            ) : null}
+            <Link to={href} className={`${isList ? 'btn-secondary h-11 px-4' : 'btn-secondary h-11 w-full justify-center px-4 sm:w-auto'}`}>
+              {isList ? 'View details' : 'View'}
+              <FiArrowRight size={16} />
+            </Link>
           </div>
         </div>
       </div>

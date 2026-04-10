@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   FiArrowRight,
@@ -11,8 +11,8 @@ import {
   FiShoppingBag,
   FiUser,
 } from 'react-icons/fi';
-import { MdElectricBolt } from 'react-icons/md';
 import { useAuth } from '../../context/AuthContext';
+import StoreLogo from '../../components/ui/StoreLogo';
 
 const BENEFITS = [
   {
@@ -60,17 +60,7 @@ export default function StoreRegisterPage() {
 
           <div className="relative">
             <Link to="/" className="inline-flex items-center gap-3">
-              <div className="rounded-[18px] bg-white/12 p-3 text-white">
-                <MdElectricBolt className="text-2xl" />
-              </div>
-              <div>
-                <p className="text-lg font-bold text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-                  TechZone
-                </p>
-                <p className="text-xs uppercase tracking-[0.24em] text-cyan-100/70">
-                  New account
-                </p>
-              </div>
+              <StoreLogo light tagline="New account" />
             </Link>
 
             <div className="mt-10 max-w-2xl">
@@ -181,7 +171,7 @@ export default function StoreRegisterPage() {
               </div>
 
               <div className="rounded-[28px] bg-[rgba(15,23,42,0.04)] px-5 py-4 text-sm leading-7 text-slate-600">
-                By creating an account, you’re setting up a faster route to saved items, account details, and future checkouts.
+                By creating an account, you're setting up a faster route to saved items, account details, and future checkouts.
               </div>
 
               <button
@@ -208,3 +198,4 @@ export default function StoreRegisterPage() {
     </div>
   );
 }
+

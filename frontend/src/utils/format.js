@@ -1,10 +1,10 @@
-const currencyFormatter = new Intl.NumberFormat('en-US', {
+const currencyFormatter = new Intl.NumberFormat('en-IN', {
   style: 'currency',
-  currency: 'USD',
-  maximumFractionDigits: 2,
+  currency: 'INR',
+  maximumFractionDigits: 0,
 });
 
-const compactNumberFormatter = new Intl.NumberFormat('en-US', {
+const compactNumberFormatter = new Intl.NumberFormat('en-IN', {
   notation: 'compact',
   maximumFractionDigits: 1,
 });
@@ -19,7 +19,7 @@ export const formatDate = (value, options = {}) => {
     return 'Not available';
   }
 
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('en-IN', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',

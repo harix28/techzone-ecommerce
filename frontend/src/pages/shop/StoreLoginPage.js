@@ -10,8 +10,8 @@ import {
   FiShield,
   FiTruck,
 } from 'react-icons/fi';
-import { MdElectricBolt } from 'react-icons/md';
 import { useAuth } from '../../context/AuthContext';
+import StoreLogo from '../../components/ui/StoreLogo';
 
 const TRUST_POINTS = [
   {
@@ -60,17 +60,7 @@ export default function StoreLoginPage() {
 
           <div className="relative">
             <Link to="/" className="inline-flex items-center gap-3">
-              <div className="rounded-[18px] bg-white/10 p-3 text-white">
-                <MdElectricBolt className="text-2xl" />
-              </div>
-              <div>
-                <p className="text-lg font-bold text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-                  TechZone
-                </p>
-                <p className="text-xs uppercase tracking-[0.24em] text-slate-400">
-                  Account access
-                </p>
-              </div>
+              <StoreLogo light tagline="Account access" />
             </Link>
 
             <div className="mt-10 max-w-2xl">
