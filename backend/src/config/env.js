@@ -46,29 +46,62 @@ const decodeBase64 = (value) => {
   }
 };
 
-const nodeEnv = process.env.NODE_ENV || 'development';
+const isVercel = process.env.VERCEL === '1';
+const readRequired = (...keys) => {
+  for (const key of keys) {
+    const value = process.env[key];
+
+    if (value !== undefined && value !== null && String(value).trim() !== '') {
+      return value;
+    }
+  }
+
+  throw new Error(`Missing required environment variable: ${keys.join(' or ')}`);
+};
+
+const readOptional = (fallback, ...keys) => {
+  for (const key of keys) {
+    const value = process.env[key];
+
+    if (value !== undefined && value !== null && String(value).trim() !== '') {
+      return value;
+    }
+  }
+
+  return fallback;
+};
+
+const nodeEnv = process.env.NODE_ENV || (isVercel ? 'production' : 'development');
 const sslMode = String(process.env.DB_SSL_MODE || '').trim().toLowerCase();
 const sslCa = decodeBase64(process.env.DB_SSL_CA_BASE64) || decodeMultiline(process.env.DB_SSL_CA);
 const sslEnabled =
   toBool(process.env.DB_SSL, false) || ['required', 'verify-ca', 'verify_identity'].includes(sslMode);
+const rawCorsOrigins = isVercel
+  ? readRequired('CORS_ORIGINS', 'FRONTEND_URLS', 'FRONTEND_URL')
+  : readOptional('http://localhost:3000,http://localhost:5173', 'CORS_ORIGINS', 'FRONTEND_URLS', 'FRONTEND_URL');
+const accessSecret = isVercel
+  ? readRequired('JWT_ACCESS_SECRET', 'JWT_SECRET')
+  : readOptional('change-me-access-secret', 'JWT_ACCESS_SECRET', 'JWT_SECRET');
+const refreshSecret = isVercel
+  ? readRequired('JWT_REFRESH_SECRET')
+  : readOptional('change-me-refresh-secret', 'JWT_REFRESH_SECRET');
+const dbHost = isVercel ? readRequired('DB_HOST') : readOptional('127.0.0.1', 'DB_HOST');
+const dbName = isVercel ? readRequired('DB_NAME') : readOptional('techzone_ecommerce', 'DB_NAME');
+const dbUser = isVercel ? readRequired('DB_USER') : readOptional('root', 'DB_USER');
+const dbPassword = isVercel ? readRequired('DB_PASSWORD') : readOptional('', 'DB_PASSWORD');
 
 module.exports = {
   nodeEnv,
   isProduction: nodeEnv === 'production',
   port: toInt(process.env.PORT, 5000),
   appName: process.env.APP_NAME || 'TechZone API',
-  corsOrigins: toList(
-    process.env.CORS_ORIGINS ||
-      process.env.FRONTEND_URLS ||
-      process.env.FRONTEND_URL ||
-      'http://localhost:3000,http://localhost:5173',
-  ),
+  corsOrigins: toList(rawCorsOrigins),
   db: {
-    host: process.env.DB_HOST || '127.0.0.1',
+    host: dbHost,
     port: toInt(process.env.DB_PORT, 3306),
-    name: process.env.DB_NAME || 'techzone_ecommerce',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
+    name: dbName,
+    user: dbUser,
+    password: dbPassword,
     connectionLimit: toInt(process.env.DB_CONNECTION_LIMIT, 10),
     ssl: {
       enabled: sslEnabled,
@@ -78,8 +111,8 @@ module.exports = {
     },
   },
   auth: {
-    accessSecret: process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET || 'change-me-access-secret',
-    refreshSecret: process.env.JWT_REFRESH_SECRET || 'change-me-refresh-secret',
+    accessSecret,
+    refreshSecret,
     accessTtl: process.env.JWT_ACCESS_TTL || '15m',
     refreshTtl: process.env.JWT_REFRESH_TTL || '30d',
     refreshCookieName: process.env.JWT_REFRESH_COOKIE_NAME || 'techzone_refresh_token',
