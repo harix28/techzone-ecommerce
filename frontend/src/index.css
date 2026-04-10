@@ -7,17 +7,17 @@
 @layer base {
   :root {
     color-scheme: light;
-    --store-bg: #f6f1e7;
-    --store-surface: rgba(255, 252, 246, 0.82);
-    --store-surface-strong: #fffdf9;
-    --store-card: rgba(255, 255, 255, 0.94);
-    --store-ink: #10131a;
-    --store-muted: #5b6472;
-    --store-border: rgba(15, 23, 42, 0.09);
-    --store-accent: #0f766e;
-    --store-accent-strong: #0b4f49;
-    --store-warm: #ffb454;
-    --store-shadow: 0 28px 80px rgba(15, 23, 42, 0.08);
+    --store-bg: #f1f3f6;
+    --store-surface: #ffffff;
+    --store-surface-strong: #ffffff;
+    --store-card: #ffffff;
+    --store-ink: #172337;
+    --store-muted: #5f6c7b;
+    --store-border: rgba(15, 23, 42, 0.08);
+    --store-accent: #2874f0;
+    --store-accent-strong: #0f56d9;
+    --store-warm: #ffb400;
+    --store-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
   }
 
   * {
@@ -32,9 +32,7 @@
     @apply min-h-screen text-slate-900 antialiased;
     font-family: 'Manrope', system-ui, sans-serif;
     background:
-      radial-gradient(circle at top left, rgba(15, 118, 110, 0.12), transparent 26%),
-      radial-gradient(circle at top right, rgba(255, 180, 84, 0.15), transparent 24%),
-      linear-gradient(180deg, #fbf7f0 0%, #f6f1e7 48%, #f2ebe0 100%);
+      linear-gradient(180deg, #f6f8fb 0%, #f1f3f6 100%);
   }
 
   #root {
@@ -67,18 +65,18 @@
   }
 
   ::selection {
-    background: rgba(15, 118, 110, 0.18);
+    background: rgba(40, 116, 240, 0.16);
     color: #0f172a;
   }
 }
 
 @layer components {
   .page-shell {
-    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+    @apply mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8;
   }
 
   .section-kicker {
-    @apply text-xs font-semibold uppercase tracking-[0.28em] text-slate-400;
+    @apply text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500;
   }
 
   .headline-balance {
@@ -90,37 +88,37 @@
     background: var(--store-card);
     border: 1px solid var(--store-border);
     box-shadow: var(--store-shadow);
-    @apply rounded-[32px];
+    @apply rounded-[24px];
   }
 
   .panel-muted {
-    background: rgba(255, 255, 255, 0.55);
-    border: 1px solid rgba(148, 163, 184, 0.14);
-    @apply rounded-[28px] backdrop-blur-xl;
+    background: #f8faff;
+    border: 1px solid rgba(40, 116, 240, 0.09);
+    @apply rounded-[20px];
   }
 
   .glass-panel {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(255, 255, 255, 0.62));
-    border: 1px solid rgba(148, 163, 184, 0.14);
-    box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
-    @apply rounded-[28px] backdrop-blur-xl;
+    background: #ffffff;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+    @apply rounded-[20px];
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold text-white transition duration-200 disabled:cursor-not-allowed disabled:opacity-50;
-    background: linear-gradient(135deg, #0f172a, #1f2937 45%, #0f766e 100%);
-    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.16);
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white transition duration-200 disabled:cursor-not-allowed disabled:opacity-50;
+    background: linear-gradient(135deg, #2874f0, #0f56d9 72%);
+    box-shadow: 0 10px 24px rgba(40, 116, 240, 0.2);
   }
 
   .btn-primary:hover {
     transform: translateY(-1px);
-    box-shadow: 0 18px 34px rgba(15, 23, 42, 0.2);
+    box-shadow: 0 12px 28px rgba(40, 116, 240, 0.24);
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border px-5 py-3 text-sm font-semibold text-slate-700 transition duration-200;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-semibold text-slate-700 transition duration-200;
     border-color: rgba(15, 23, 42, 0.1);
-    background: rgba(255, 255, 255, 0.82);
+    background: #ffffff;
   }
 
   .btn-secondary:hover {
@@ -129,7 +127,7 @@
   }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-slate-700 transition duration-200;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 transition duration-200;
   }
 
   .btn-ghost:hover {
@@ -137,20 +135,20 @@
   }
 
   .btn-danger {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-rose-600 px-5 py-3 text-sm font-semibold text-white transition duration-200 hover:bg-rose-700;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-rose-600 px-5 py-3 text-sm font-semibold text-white transition duration-200 hover:bg-rose-700;
   }
 
   .input {
-    @apply h-12 w-full rounded-2xl border px-4 text-sm text-slate-900 outline-none transition duration-200;
+    @apply h-12 w-full rounded-xl border px-4 text-sm text-slate-900 outline-none transition duration-200;
     border-color: rgba(15, 23, 42, 0.1);
-    background: rgba(255, 255, 255, 0.86);
+    background: #ffffff;
   }
 
   .input:focus,
   textarea:focus,
   select:focus {
-    border-color: rgba(15, 118, 110, 0.5);
-    box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.1);
+    border-color: rgba(40, 116, 240, 0.5);
+    box-shadow: 0 0 0 4px rgba(40, 116, 240, 0.1);
   }
 
   .input-shell {
@@ -167,7 +165,7 @@
   }
 
   .pill {
-    @apply inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em];
+    @apply inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em];
   }
 
   .pill-muted {
@@ -204,15 +202,42 @@
   }
 
   .product-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 46px rgba(15, 23, 42, 0.12);
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.1);
   }
 
   .auth-backdrop {
     background:
-      radial-gradient(circle at top right, rgba(255, 180, 84, 0.22), transparent 28%),
-      radial-gradient(circle at left center, rgba(15, 118, 110, 0.18), transparent 26%),
-      linear-gradient(145deg, #09141b 0%, #12232d 44%, #18343a 100%);
+      radial-gradient(circle at top right, rgba(255, 180, 84, 0.24), transparent 30%),
+      linear-gradient(145deg, #0f56d9 0%, #1f5ebd 42%, #172337 100%);
+  }
+
+  .hero-scroll {
+    scrollbar-width: none;
+  }
+
+  .hero-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hero-snap {
+    scroll-snap-type: x mandatory;
+  }
+
+  .hero-snap > * {
+    scroll-snap-align: start;
+  }
+
+  @media (max-width: 640px) {
+    .card,
+    .panel {
+      @apply rounded-[18px];
+    }
+
+    .panel-muted,
+    .glass-panel {
+      @apply rounded-[16px];
+    }
   }
 }
 
